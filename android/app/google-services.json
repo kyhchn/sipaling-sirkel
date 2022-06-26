@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "281086640871",
+    "firebase_url": "https://sambat-yuk-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "sambat-yuk",
+    "storage_bucket": "sambat-yuk.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:281086640871:android:50c9c11a74ecb196ab9842",
+        "android_client_info": {
+          "package_name": "com.example.sipaling_sirkel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "281086640871-l2b5aefkrihlqk38cvedgtc49dejcg7k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaBLxXBuPluIcOM8zauygZqavhvGfWSQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "281086640871-l2b5aefkrihlqk38cvedgtc49dejcg7k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
