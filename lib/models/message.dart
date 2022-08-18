@@ -1,7 +1,9 @@
-class Message{
-  late String message;
-  late String datetime;
-  late String id;
-  Message({required this.message, required this.datetime, required this.id});
-  
+class Message {
+  String message;
+  String uid;
+  Message({required this.message, required this.uid});
+  factory Message.RTDB(Map<String, dynamic> data) {
+    return Message(
+        message: data['message'], uid: data['uid']);
+  }
 }
