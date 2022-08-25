@@ -21,7 +21,7 @@ class AuthPage extends StatelessWidget {
                 EmailProviderConfiguration(),
                 GoogleProviderConfiguration(
                     clientId:
-                        '281086640871-l2b5aefkrihlqk38cvedgtc49dejcg7k.apps.googleusercontent.com')
+                        '281086640871-l2b5aefkrihlqk38cvedgtc49dejcg7k.apps.googleusercontent.com'),
               ],
               headerBuilder: (context, constraints, _) {
                 return Column(
