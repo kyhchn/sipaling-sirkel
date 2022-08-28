@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 import 'package:sipaling_sirkel/models/circle_room.dart';
 import 'package:sipaling_sirkel/services/send_user_data_service.dart';
 import 'package:sipaling_sirkel/variables.dart';

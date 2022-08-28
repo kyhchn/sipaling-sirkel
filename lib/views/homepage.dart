@@ -3,22 +3,81 @@ import 'package:flutter/material.dart';
 import 'package:flutterfire_ui/auth.dart';
 import 'package:get/get.dart';
 import 'package:sipaling_sirkel/main_colors.dart';
-import 'package:sipaling_sirkel/models/user_database.dart';
-import 'package:sipaling_sirkel/services/create_circle_service.dart';
-import 'package:sipaling_sirkel/services/get_user_data.dart';
-import 'package:sipaling_sirkel/services/join_circle_service.dart';
-import 'package:sipaling_sirkel/services/send_message_service.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:sipaling_sirkel/services/send_user_data_service.dart';
-import 'package:sipaling_sirkel/views/chat_room.dart';
+import 'package:sipaling_sirkel/services/create_circle_service.dart';
 
 class HomePage extends StatelessWidget {
   final User user;
   HomePage({Key? key, required this.user});
   final DatabaseReference database = FirebaseDatabase.instance.ref();
+  final _circleCodeController = TextEditingController().obs;
+  final _circleNameController = TextEditingController().obs;
+  final _addCircleController = Get.put(CreateCircleService());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showDialog(
+            context: context,
+            builder: (BuildContext context) => Obx(
+                  () => AlertDialog(
+                    title: Text('Create your own circle\'s'),
+                    content: Container(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: _circleNameController.value,
+                            decoration:
+                                InputDecoration(hintText: 'Circle Name'),
+                          ),
+                          TextField(
+                            controller: _circleCodeController.value,
+                            decoration:
+                                InputDecoration(hintText: 'Circle Code'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Cancel')),
+                      TextButton(
+                          onPressed: () async {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                      content: Row(
+                                        children: [
+                                          CircularProgressIndicator(),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(left: 5),
+                                            child: Text('Loading...'),
+                                          )
+                                        ],
+                                      ),
+                                    ));
+                            bool isSuccess =
+                                await CreateCircleService.postCircle(
+                                    _circleNameController.value.text,
+                                    user,
+                                    _circleCodeController.value.text);
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(isSuccess
+                                    ? 'Success to create circle'
+                                    : 'Circle already exist')));
+                            Navigator.pop(context);
+                          },
+                          child: Text('Create')),
+                    ],
+                  ),
+                )),
+        elevation: 0,
+        child: Icon(Icons.add),
+      ),
       appBar: AppBar(
         title: Text('WELCUM'),
       ),
