@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:sipaling_sirkel/main_colors.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:sipaling_sirkel/services/create_circle_service.dart';
+import 'package:sipaling_sirkel/services/storage_service.dart';
 
 class HomePage extends StatelessWidget {
   final User user;
@@ -12,7 +13,6 @@ class HomePage extends StatelessWidget {
   final DatabaseReference database = FirebaseDatabase.instance.ref();
   final _circleCodeController = TextEditingController().obs;
   final _circleNameController = TextEditingController().obs;
-  final _addCircleController = Get.put(CreateCircleService());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +63,7 @@ class HomePage extends StatelessWidget {
                                 await CreateCircleService.postCircle(
                                     _circleNameController.value.text,
                                     user,
-                                    _circleCodeController.value.text);
+                                    _circleCodeController.value.text,null);
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text(isSuccess
@@ -82,10 +82,43 @@ class HomePage extends StatelessWidget {
         title: Text('WELCUM'),
       ),
       body: SafeArea(
-        child: Column(
-          children: [],
-        ),
-      ),
+          child: StreamBuilder(
+        stream: database.child('users/${user.uid}/circleList').onValue,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Container(
+              color: Colors.red,
+              height: MediaQuery.of(context).size.height * 0.2,
+            );
+          } else {
+            if ((snapshot.data! as DatabaseEvent).snapshot.value == null) {
+              return Container(
+                color: Colors.red,
+                height: MediaQuery.of(context).size.height * 0.2,
+              );
+            } else {
+              final listTile = <ListTile>[];
+              final listCircle =
+                  ((snapshot.data! as DatabaseEvent).snapshot.value) as List;
+              listCircle.forEach((val) {
+                final data = Map<String, dynamic>.from(val);
+                final circle = ListTile(
+                  leading: Icon(Icons.plus_one),
+                  trailing: IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.arrow_forward_ios_sharp)),
+                  title: Text(data['circleName']),
+                  subtitle: Text(data['circleCode']),
+                );
+                listTile.add(circle);
+              });
+              return ListView(
+                children: listTile,
+              );
+            }
+          }
+        },
+      )),
       drawer: Drawer(
         elevation: 0,
         backgroundColor: MainColors.lightGrey,
@@ -153,8 +186,7 @@ class HomePage extends StatelessWidget {
                       itemCount: 5)),
               IconButton(
                   onPressed: () async {
-                    await FlutterFireUIAuth.signOut(
-                        context: context, auth: FirebaseAuth.instance);
+                    await StorageService().uploadImage('assets/images/gwehj.jpg', 'gwehj', user);
                   },
                   icon: Icon(Icons.power_settings_new))
             ],

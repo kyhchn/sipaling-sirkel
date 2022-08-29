@@ -6,8 +6,8 @@ import 'package:sipaling_sirkel/variables.dart';
 
 class CreateCircleService {
   static Future<bool> postCircle(
-      String circleName, User user, String circleCode) async {
-    final child = await database.child('circles/$circleCode');
+      String circleName, User user, String circleCode, String? imageUrl) async {
+    final child = database.child('circles/$circleCode');
     final snapshot = await child.get();
     if (snapshot.exists) {
       print('circle already exist');
@@ -19,6 +19,7 @@ class CreateCircleService {
             'adminUid': user.uid,
             'circleCode': circleCode,
             'users': [user.uid],
+            // 'imageUrl' : imageUrl!=null?imageUrl:
           })
           .catchError((errorr) => print(errorr.toString()))
           .then((value) => print('succes creating circles'));

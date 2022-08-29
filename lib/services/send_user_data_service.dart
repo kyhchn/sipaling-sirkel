@@ -7,7 +7,7 @@ import 'package:sipaling_sirkel/services/get_user_data.dart';
 class SendUserDataService {
   static Future postUserData(
       UserDatabase target, DatabaseReference database) async {
-    final child = await database.child('users/${target.uid}');
+    final child = database.child('users/${target.uid}');
     final snapshot = await child.get();
     if (snapshot.exists) {
       print('data found, tying to update the values');
@@ -27,7 +27,6 @@ class SendUserDataService {
       }).catchError((errorr) => errorr.toString());
     } else {
       print('data doesn\'t found, trying to write user data to database');
-      List x = [];
       await child.set({
         'uid': target.uid,
         'email': target.email,
@@ -56,6 +55,6 @@ class SendUserDataService {
     data.listCircle!.forEach((element) {
       print(element.circleCode + ' ' + element.circleName + ' after add');
     });
-    postUserData(data, database);
+    await postUserData(data, database);
   }
 }
