@@ -5,15 +5,23 @@ import 'package:flutterfire_ui/auth.dart';
 import 'package:sipaling_sirkel/services/get_user_data.dart';
 import 'package:sipaling_sirkel/services/send_user_data_service.dart';
 import 'package:sipaling_sirkel/views/homepage.dart';
+
+import '../models/user_database.dart';
+
 class AuthPage extends StatelessWidget {
   AuthPage({Key? key}) : super(key: key);
   DatabaseReference database = FirebaseDatabase.instance.ref();
+  Future init(User target) async {
+    UserDatabase user = await GetUserData.getUserData(target);
+    await SendUserDataService.postUserData(user, database);
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) { 
+          if (!snapshot.hasData) {
             return SignInScreen(
               resizeToAvoidBottomInset: true,
               oauthButtonVariant: OAuthButtonVariant.icon_and_text,
@@ -51,6 +59,9 @@ class AuthPage extends StatelessWidget {
               },
             );
           }
+          CircularProgressIndicator();
+          init(snapshot.data!);
+          Future.delayed(Duration(seconds: 2));
           return HomePage(
             user: snapshot.data!,
           );

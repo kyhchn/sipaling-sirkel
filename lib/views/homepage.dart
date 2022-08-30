@@ -4,8 +4,11 @@ import 'package:flutterfire_ui/auth.dart';
 import 'package:get/get.dart';
 import 'package:sipaling_sirkel/main_colors.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:sipaling_sirkel/models/user_database.dart';
 import 'package:sipaling_sirkel/services/create_circle_service.dart';
-import 'package:sipaling_sirkel/services/storage_service.dart';
+import 'package:sipaling_sirkel/services/get_user_data.dart';
+import 'package:sipaling_sirkel/services/join_circle_service.dart';
+import 'package:sipaling_sirkel/services/send_user_data_service.dart';
 
 class HomePage extends StatelessWidget {
   final User user;
@@ -13,68 +16,40 @@ class HomePage extends StatelessWidget {
   final DatabaseReference database = FirebaseDatabase.instance.ref();
   final _circleCodeController = TextEditingController().obs;
   final _circleNameController = TextEditingController().obs;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog(
-            context: context,
-            builder: (BuildContext context) => Obx(
-                  () => AlertDialog(
-                    title: Text('Create your own circle\'s'),
-                    content: Container(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextField(
-                            controller: _circleNameController.value,
-                            decoration:
-                                InputDecoration(hintText: 'Circle Name'),
-                          ),
-                          TextField(
-                            controller: _circleCodeController.value,
-                            decoration:
-                                InputDecoration(hintText: 'Circle Code'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text('Cancel')),
-                      TextButton(
-                          onPressed: () async {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) => AlertDialog(
-                                      content: Row(
-                                        children: [
-                                          CircularProgressIndicator(),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 5),
-                                            child: Text('Loading...'),
-                                          )
-                                        ],
-                                      ),
-                                    ));
-                            bool isSuccess =
-                                await CreateCircleService.postCircle(
-                                    _circleNameController.value.text,
-                                    user,
-                                    _circleCodeController.value.text,null);
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(isSuccess
-                                    ? 'Success to create circle'
-                                    : 'Circle already exist')));
-                            Navigator.pop(context);
-                          },
-                          child: Text('Create')),
-                    ],
-                  ),
-                )),
+          context: context,
+          builder: (BuildContext context) => SimpleDialog(
+            children: [
+              SimpleDialogOption(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => NewCircleAlert(
+                        circleNameController: _circleNameController,
+                        circleCodeController: _circleCodeController,
+                        user: user),
+                  );
+                },
+                child: Text('Create new circle'),
+              ),
+              SimpleDialogOption(
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) => JoinCircleAlert(
+                      circleNameController: _circleNameController,
+                      circleCodeController: _circleCodeController,
+                      user: user),
+                ),
+                child: Text('Join circle'),
+              ),
+            ],
+          ),
+        ),
         elevation: 0,
         child: Icon(Icons.add),
       ),
@@ -184,14 +159,167 @@ class HomePage extends StatelessWidget {
                             color: Colors.grey,
                           ),
                       itemCount: 5)),
-              IconButton(
-                  onPressed: () async {
-                    await StorageService().uploadImage('assets/images/gwehj.jpg', 'gwehj', user);
-                  },
-                  icon: Icon(Icons.power_settings_new))
+              Row(
+                children: [
+                  IconButton(
+                      onPressed: () async {
+                        await FlutterFireUIAuth.signOut();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Success to Log Out')));
+                      },
+                      icon: Icon(Icons.power_settings_new)),
+                  ElevatedButton(onPressed: () {}, child: Text('tes upload'))
+                ],
+              ),
+              Image.asset('assets/images/gwehj.jpg')
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class JoinCircleAlert extends StatelessWidget {
+  const JoinCircleAlert({
+    Key? key,
+    required Rx<TextEditingController> circleNameController,
+    required Rx<TextEditingController> circleCodeController,
+    required this.user,
+  })  : _circleNameController = circleNameController,
+        _circleCodeController = circleCodeController,
+        super(key: key);
+
+  final Rx<TextEditingController> _circleNameController;
+  final Rx<TextEditingController> _circleCodeController;
+  final User user;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => AlertDialog(
+        title: Text('Join circle'),
+        content: Container(
+          child: TextField(
+            controller: _circleCodeController.value,
+            decoration: InputDecoration(hintText: 'Circle Code'),
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                _circleCodeController.value.clear();
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: Text('Cancel')),
+          TextButton(
+              onPressed: () async {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                          content: Row(
+                            children: [
+                              CircularProgressIndicator(),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: Text('Loading...'),
+                              )
+                            ],
+                          ),
+                        ));
+                String message = await JoinCircleService.joinCircle(
+                    user, _circleCodeController.value.text);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(message)));
+                _circleCodeController.value.clear();
+                _circleNameController.value.clear();
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: Text('Join')),
+        ],
+      ),
+    );
+  }
+}
+
+class NewCircleAlert extends StatelessWidget {
+  const NewCircleAlert({
+    Key? key,
+    required Rx<TextEditingController> circleNameController,
+    required Rx<TextEditingController> circleCodeController,
+    required this.user,
+  })  : _circleNameController = circleNameController,
+        _circleCodeController = circleCodeController,
+        super(key: key);
+
+  final Rx<TextEditingController> _circleNameController;
+  final Rx<TextEditingController> _circleCodeController;
+  final User user;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => AlertDialog(
+        title: Text('Create your own circle\'s'),
+        content: Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _circleNameController.value,
+                decoration: InputDecoration(hintText: 'Circle Name'),
+              ),
+              TextField(
+                controller: _circleCodeController.value,
+                decoration: InputDecoration(hintText: 'Circle Code'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                _circleCodeController.value.clear();
+                _circleNameController.value.clear();
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: Text('Cancel')),
+          TextButton(
+              onPressed: () async {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                          content: Row(
+                            children: [
+                              CircularProgressIndicator(),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: Text('Loading...'),
+                              )
+                            ],
+                          ),
+                        ));
+                bool isSuccess = await CreateCircleService.postCircle(
+                    _circleNameController.value.text,
+                    user,
+                    _circleCodeController.value.text,
+                    null);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(isSuccess
+                        ? 'Success to create circle'
+                        : 'Circle already exist')));
+                _circleCodeController.value.clear();
+                _circleNameController.value.clear();
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: Text('Create')),
+        ],
       ),
     );
   }

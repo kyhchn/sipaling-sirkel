@@ -12,12 +12,14 @@ class SendUserDataService {
     if (snapshot.exists) {
       print('data found, tying to update the values');
       List<Map<String, dynamic>> circleList = [];
-      target.listCircle!.forEach((element) {
-        circleList.add({
-          'circleName': element.circleName,
-          'circleCode': element.circleCode,
+      if (target.listCircle != null) {
+        target.listCircle!.forEach((element) {
+          circleList.add({
+            'circleName': element.circleName,
+            'circleCode': element.circleCode,
+          });
         });
-      });
+      }
       await child.update({
         'displayName': target.displayName,
         'imageUrl': target.imageUrl,
@@ -25,7 +27,7 @@ class SendUserDataService {
         'email': target.email,
         'circleList': circleList
       }).catchError((errorr) => errorr.toString());
-    } else {
+    } else {      
       print('data doesn\'t found, trying to write user data to database');
       await child.set({
         'uid': target.uid,
