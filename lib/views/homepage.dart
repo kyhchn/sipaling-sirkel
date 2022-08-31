@@ -1,14 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterfire_ui/auth.dart';
 import 'package:get/get.dart';
-import 'package:sipaling_sirkel/main_colors.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:sipaling_sirkel/models/user_database.dart';
 import 'package:sipaling_sirkel/services/create_circle_service.dart';
-import 'package:sipaling_sirkel/services/get_user_data.dart';
 import 'package:sipaling_sirkel/services/join_circle_service.dart';
-import 'package:sipaling_sirkel/services/send_user_data_service.dart';
+
+import 'widgets/custom_drawer.dart';
 
 class HomePage extends StatelessWidget {
   final User user;
@@ -16,6 +13,10 @@ class HomePage extends StatelessWidget {
   final DatabaseReference database = FirebaseDatabase.instance.ref();
   final _circleCodeController = TextEditingController().obs;
   final _circleNameController = TextEditingController().obs;
+  dispose() {
+    _circleCodeController.value.dispose();
+    _circleNameController.value.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,88 +95,7 @@ class HomePage extends StatelessWidget {
           }
         },
       )),
-      drawer: Drawer(
-        elevation: 0,
-        backgroundColor: MainColors.lightGrey,
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Container(
-                  height: MediaQuery.of(context).size.height * 0.15,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            CircleAvatar(
-                              radius: MediaQuery.of(context).size.width * 0.1,
-                              backgroundColor: Colors.transparent,
-                              backgroundImage: NetworkImage(user.photoURL!),
-                            ),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Text(
-                              user.displayName!,
-                              style: TextStyle(
-                                fontSize: 23,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 1.5,
-                        color: Colors.grey,
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                  child: ListView.separated(
-                      itemBuilder: (context, index) => Container(
-                            height: 50,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Icon(Icons.settings),
-                                SizedBox(
-                                  width: 15,
-                                ),
-                                Text('Settings')
-                              ],
-                            ),
-                          ),
-                      separatorBuilder: (context, index) => Container(
-                            height: 1.5,
-                            color: Colors.grey,
-                          ),
-                      itemCount: 5)),
-              Row(
-                children: [
-                  IconButton(
-                      onPressed: () async {
-                        await FlutterFireUIAuth.signOut();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Success to Log Out')));
-                      },
-                      icon: Icon(Icons.power_settings_new)),
-                  ElevatedButton(onPressed: () {}, child: Text('tes upload'))
-                ],
-              ),
-              Image.asset('assets/images/gwehj.jpg')
-            ],
-          ),
-        ),
-      ),
+      drawer: CustomDrawer(user: user),
     );
   }
 }
