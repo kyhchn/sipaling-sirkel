@@ -14,9 +14,8 @@ class UploadImageService {
   UploadImageService({required this.targetFile});
   Future<void> uploadProfileUser(User user, BuildContext context) async {
     String fileName = p.basename(targetFile.path);
-    final firebaseReference = FirebaseStorage.instance
-        .ref()
-        .child('users/${user.displayName}/$fileName');
+    final firebaseReference =
+        FirebaseStorage.instance.ref().child('users/${user.uid}/$fileName');
     print('instance already initialized');
     try {
       print('start uploading to firebase');

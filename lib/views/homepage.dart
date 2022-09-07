@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:sipaling_sirkel/services/create_circle_service.dart';
 import 'package:sipaling_sirkel/services/join_circle_service.dart';
+import 'package:sipaling_sirkel/views/chat_room.dart';
 
 import 'widgets/custom_drawer.dart';
 
@@ -81,7 +83,12 @@ class HomePage extends StatelessWidget {
                 final circle = ListTile(
                   leading: Icon(Icons.plus_one),
                   trailing: IconButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => ChatRoom(
+                                user: user, CircleCode: data['circleCode']),
+                          )),
                       icon: Icon(Icons.arrow_forward_ios_sharp)),
                   title: Text(data['circleName']),
                   subtitle: Text(data['circleCode']),

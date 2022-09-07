@@ -3,7 +3,6 @@ class Message {
   String uid;
   Message({required this.message, required this.uid});
   factory Message.RTDB(Map<String, dynamic> data) {
-    return Message(
-        message: data['message'], uid: data['uid']);
+    return Message(message: data['message'], uid: data['uid']);
   }
 }
